@@ -14,7 +14,8 @@ const StatsCard = ({ cols ,total_participants_running_game,
   commission_running_game,
   jackpot_running_game,
   game_statusRunning,
-  returnStatusChanger
+  returnStatusChanger,
+  announceButton
 }) => {
 
     const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -77,8 +78,8 @@ const StatsCard = ({ cols ,total_participants_running_game,
     <Card className='card-statistics'>
       <CardHeader>
         <CardTitle tag='h4'>Scheduled Game</CardTitle>
-        {/* status  */}
-        <ButtonDropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
+        {/* status  */}<div>
+            <ButtonDropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
       <DropdownToggle color={
     game_statusRunning === 'scheduled' ? 'danger' :
     game_statusRunning === 'waiting' ? 'primary' :
@@ -114,6 +115,9 @@ const StatsCard = ({ cols ,total_participants_running_game,
 
       </DropdownMenu>
     </ButtonDropdown>
+    {announceButton}
+        </div>
+      
       </CardHeader>
       <CardBody className='statistics-body'>
         <Row>{renderData()}</Row>

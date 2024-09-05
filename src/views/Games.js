@@ -3,6 +3,7 @@ import {
   DollarSign,
   Eye,
   Plus,
+  RefreshCcw,
   Search,
   Share,
   Trash2,
@@ -77,12 +78,17 @@ const Games = () => {
   const [running_game_id, setRunning_Game_id] = useState("");
   const [activeImageIndex, setActiveImageIndex] = useState(null);
   const [confirmationModalResult, setConfirmationModalResult] = useState(false);
+  const [confirmationModalResult1, setConfirmationModalResult1] =
+    useState(false);
+
   const [gameIdResult, setGameIdResult] = useState("");
   const [selected_winner_ball, setSelected_winner_ball] = useState("");
   const [selected_winner_ball_url, setSelected_winner_ball_url] = useState("");
   const [restartGameLoading, setRestartGameLoading] = useState(false);
   const [loadingAnounce, setLoadingAnounce] = useState(false);
   const [confirmationModalDelete, setConfirmationModalDelete] = useState(false);
+  const [confirmationModalReset, setConfirmationModalReset] = useState(false);
+
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [viewGameModal, setViewGameModal] = useState(false);
   const [gameIdDetails, setGameIdDetails] = useState("");
@@ -104,6 +110,7 @@ const Games = () => {
     entry_fees: Yup.string().required("Entry Fees is required"),
     commission: Yup.string().required("Commission is required"),
   });
+
   const getAllGames = async () => {
     const apiData1 = await get("game/get_all_games"); // Specify the endpoint you want to call
     console.log("Get all games");
@@ -116,6 +123,8 @@ const Games = () => {
       setEmptyData(true);
     } else {
       console.log("data");
+      // setAllData(apiData1.data);
+      // set only first five rows
       setAllData(apiData1.data);
       // setAllData([])
       setEmptyData(false);
@@ -170,6 +179,56 @@ const Games = () => {
       getAllGames();
       getCurrentRunningGames();
     }
+  };
+  const ResetCall = async () => {
+    try{
+
+ 
+    setLoadingAnounce(true);
+    console.log("gameIdResult");
+    console.log(gameIdResult);
+    // if (running_game_id === gameIdResult) {
+    //   console.log("socket");
+    //   socket.current.emit("game-created", {
+    //     status: "deleted",
+    //     message: "Game Deleted Socket Called",
+    //     game_id: running_game_id,
+    //   });
+    // }
+
+    const postData = {
+      game_id: gameIdResult,
+      reset_winner_ball: selected_winner_ball,
+    };
+    const apiData1 = await post("game/reset_game", postData); // Specify the endpoint you want to call
+    console.log("apiData1");
+
+    console.log(apiData1);
+    if (apiData1.error === true || apiData1.error === true) {
+      setLoadingDelete(false);
+      toastAlert("error", apiData1.message);
+      console.log("errorin fetching data");
+      setConfirmationModalResult1(false);
+      setAnnounceResultModal1(false)
+
+    } else {
+      setLoadingDelete(false);
+      toastAlert("success", apiData1.message);
+      setConfirmationModalResult1(false);
+      console.log("data");
+      getAllGames();
+      setLoadingAnounce(false);
+      setAnnounceResultModal1(false)
+
+      // getCurrentRunningGames();
+    }
+  }catch(error){
+    console.log(error);
+    setLoadingDelete(false)
+    setLoadingAnounce(false)
+    setAnnounceResultModal1(false)
+
+  }
   };
 
   const handleFilter = (e) => {
@@ -322,6 +381,26 @@ const Games = () => {
                 </UncontrolledTooltip>
               </>
             )}
+            {/* Reset button
+             */}
+            {row.game_status === "completed" ? (
+              <>
+                <RefreshCcw
+                  id="reset"
+                  onClick={() => {
+                    setGameIdResult(row.game_id);
+                    // setConfirmationModalReset(true);
+                    setAnnounceResultModal1(true);
+                  }}
+                  size={20}
+                  color="#00cfe9"
+                  style={{ marginLeft: "20px", cursor: "pointer" }}
+                />
+                <UncontrolledTooltip placement="top" target={`reset`}>
+                  Reset Results
+                </UncontrolledTooltip>{" "}
+              </>
+            ) : null}
             <Trash2
               id="delete"
               onClick={() => {
@@ -485,6 +564,8 @@ const Games = () => {
   };
   const [ballsImages, setBallImages] = useState([]);
   const [anounceResultModal, setAnnounceResultModal] = useState(false);
+  const [anounceResultModal1, setAnnounceResultModal1] = useState(false);
+
   const getAllBalls = async () => {
     const apiData1 = await get("contact_us/get_all_ball_images"); // Specify the endpoint you want to call
     console.log("apiData1");
@@ -567,10 +648,10 @@ const Games = () => {
         });
         // timer 1 second
         toastAlert("success", "Result Announced Successfully ");
-
+        // uncomment
         setTimeout(() => {
           window.location.reload();
-        }, 1000);
+        }, 2000);
       } else {
         toastAlert("error", "Could Not Complete Game !");
       }
@@ -836,6 +917,31 @@ socket.current.emit("game-created", { status: "scheduled", message: "Hello", gam
                           commission_running_game={commission_running_game}
                           jackpot_running_game={jackpot_running_game}
                           game_statusRunning={game_statusRunning}
+                          announceButton={
+                            game_statusRunning === "started" ? (
+                              <>
+                                <img
+                                  id="announce"
+                                  src={metaPhone}
+                                  alt="anounce Result"
+                                  onClick={() => {
+                                    setGameIdResult(running_game_id);
+                                    setAnnounceResultModal(true);
+                                  }}
+                                  style={{
+                                    marginLeft: "20px",
+                                    cursor: "pointer",
+                                  }}
+                                />
+                                <UncontrolledTooltip
+                                  placement="top"
+                                  target={`announce`}
+                                >
+                                  Announce
+                                </UncontrolledTooltip>
+                              </>
+                            ) : null
+                          }
                           returnStatusChanger={(status) => {
                             setChangeStatus(status);
                             setConfirmationModal(true);
@@ -1265,6 +1371,51 @@ socket.current.emit("game-created", { status: "scheduled", message: "Hello", gam
             </Row>
           </ModalBody>
         </Modal>
+        <Modal
+          className={"modal-dialog-centered modal-lg"}
+          isOpen={anounceResultModal1}
+          toggle={() => setAnnounceResultModal1(!anounceResultModal1)}
+          centered
+        >
+          <ModalHeader
+            toggle={() => setAnnounceResultModal1(!anounceResultModal1)}
+          >
+            Update Winner Ball
+          </ModalHeader>
+          <ModalBody>
+            <Row>
+              {ballsImages.map((item, index) => (
+                <>
+                  <Col lg="2" md="4" sm="6" style={{ padding: "10px" }}>
+                    <img
+                      onClick={() => {
+                        console.log(item);
+                        const ball_no = item.name.split("_")[1];
+                        setSelected_winner_ball(ball_no);
+                        setSelected_winner_ball_url(item.image_url);
+                        setConfirmationModalResult1(true);
+                      }}
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        cursor: "pointer",
+                        border:
+                          activeImageIndex === index
+                            ? "2px solid #1e1e1e"
+                            : "none",
+                        borderRadius: "50px",
+                      }}
+                      src={item.image_url}
+                      alt={item.balls_images_id}
+                      onMouseEnter={() => setActiveImageIndex(index)}
+                      onMouseLeave={() => setActiveImageIndex(null)}
+                    />
+                  </Col>
+                </>
+              ))}
+            </Row>
+          </ModalBody>
+        </Modal>
         {/* confirmation anounce result modal  */}
         <Modal
           isOpen={confirmationModalResult}
@@ -1307,6 +1458,56 @@ socket.current.emit("game-created", { status: "scheduled", message: "Hello", gam
               color="secondary"
               onClick={() =>
                 setConfirmationModalResult(!confirmationModalResult)
+              }
+              outline
+            >
+              Cancel
+            </Button>
+          </ModalFooter>
+        </Modal>
+        <Modal
+          isOpen={confirmationModalResult1}
+          toggle={() => setConfirmationModalResult1(!confirmationModalResult1)}
+          centered
+        >
+          <ModalHeader
+            toggle={() =>
+              setConfirmationModalResult1(!confirmationModalResult1)
+            }
+          >
+            Confirmation Alert
+          </ModalHeader>
+          <ModalBody>
+            <p>
+              Are you sure you want to update{" "}
+              <span style={{ color: "#F5BC01" }}>
+                Ball{" "}
+                {selected_winner_ball === 0 || selected_winner_ball === "0"
+                  ? "white"
+                  : selected_winner_ball}{" "}
+              </span>{" "}
+              as winner ball?
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              disabled={loadingAnounce}
+              color="primary"
+              onClick={ResetCall}
+            >
+              {loadingAnounce ? <Spinner color="light" size="sm" /> : null}
+              <span className="align-middle ms-25">Yes , Update</span>
+            </Button>
+            {/* <Button color='primary' onClick={() => {
+            // deletePosition(deleteIndex)
+            setItemDeleteConfirmation(!itemDeleteConfirmation)
+          }}>
+            Yes
+          </Button> */}
+            <Button
+              color="secondary"
+              onClick={() =>
+                setConfirmationModalResult1(!confirmationModalResult1)
               }
               outline
             >
@@ -1523,10 +1724,18 @@ socket.current.emit("game-created", { status: "scheduled", message: "Hello", gam
             >
               Winners {winnersTotal}
             </h3>
-            <h5 style={{ fontSize: "18px" }}>
-              Winning Amount{" "}
-              <span style={{ fontWeight: 500 }}>$ {winning_amount_single}</span>
-            </h5>
+            {winning_amount_single === null ||
+            winning_amount_single === undefined ||
+            winning_amount_single === "" ? (
+              <h5 style={{ fontSize: "18px" }}>House Wins</h5>
+            ) : (
+              <h5 style={{ fontSize: "18px" }}>
+                Winning Amount{" "}
+                <span style={{ fontWeight: 500 }}>
+                  $ {winning_amount_single}
+                </span>
+              </h5>
+            )}
             {/* <Button 
            onClick={()=>{
             setRestartGameModal(false)
@@ -1580,6 +1789,41 @@ socket.current.emit("game-created", { status: "scheduled", message: "Hello", gam
               color="secondary"
               onClick={() =>
                 setConfirmationModalDelete(!setConfirmationModalDelete)
+              }
+              outline
+            >
+              Cancel
+            </Button>
+          </ModalFooter>
+        </Modal>
+        <Modal
+          isOpen={confirmationModalReset}
+          toggle={() => setConfirmationModalReset(!confirmationModalReset)}
+          centered
+        >
+          <ModalHeader
+            toggle={() => setConfirmationModalReset(!confirmationModalReset)}
+          >
+            Confirmation Alert
+          </ModalHeader>
+          <ModalBody>
+            <p>Are you sure you want to reset that game result?</p>
+          </ModalBody>
+          <ModalFooter>
+            <Button disabled={loadingDelete} color="danger" onClick={() => {}}>
+              {loadingDelete ? <Spinner color="light" size="sm" /> : null}
+              <span className="align-middle ms-25">Yes Reset</span>
+            </Button>
+            {/* <Button color='primary' onClick={() => {
+            // deletePosition(deleteIndex)
+            setItemDeleteConfirmation(!itemDeleteConfirmation)
+          }}>
+            Yes
+          </Button> */}
+            <Button
+              color="secondary"
+              onClick={() =>
+                setConfirmationModalReset(!setConfirmationModalReset)
               }
               outline
             >
