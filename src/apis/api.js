@@ -1,8 +1,8 @@
 import axios from "axios";
 
-export const BASE_URL = 'https://cue-ball-be-usama.onrender.com/'; // Your API base URL
+// export const BASE_URL = "http://localhost:3016/"; // Your API base URL
 
-// export const BASE_URL = "https://backend.cueballdash.com/"; // Your API base URL
+export const BASE_URL = "https://cue-balls-be.caprover-demo.mtechub.com/"; // Your API base URL
 
 export const get = async (url = {}) => {
   // const queryParams = new URLSearchParams(params);

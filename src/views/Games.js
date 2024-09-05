@@ -440,6 +440,7 @@ const Games = () => {
     const postData = {
       game_id: running_game_id,
       game_status: "scheduled",
+      restarted: true,
     };
     const apiData = await put("game/change_game_status", postData); // Specify the endpoint you want to call
     console.log("apixxsData");
@@ -475,9 +476,8 @@ const Games = () => {
         });
         toastAlert("success", "Game Restarted Successfully ");
         setTimeout(() => {
-            window.location.reload()
-                    }
-                    , 1000);
+          window.location.reload();
+        }, 1000);
       } else {
         toastAlert("error", "Could Not Change Game Status !");
       }
@@ -565,13 +565,12 @@ const Games = () => {
           message: "Anounced Result socket",
           game_id: gameIdResult,
         });
-        // timer 1 second 
+        // timer 1 second
         toastAlert("success", "Result Announced Successfully ");
 
         setTimeout(() => {
-window.location.reload()
-        }
-        , 1000);
+          window.location.reload();
+        }, 1000);
       } else {
         toastAlert("error", "Could Not Complete Game !");
       }
@@ -613,7 +612,7 @@ window.location.reload()
       setLoadingGameId(null);
     } else {
       console.log("get view data ");
-      console.log(apiData)
+      console.log(apiData);
       setJackpot_running_game(apiData?.jackpot);
       setWinnersTotal(apiData?.game_details?.winners);
       setGameIdDetails(apiData?.game_details?.game_id);
@@ -1091,7 +1090,7 @@ socket.current.emit("game-created", { status: "scheduled", message: "Hello", gam
                     }); //scheduled
                     socket.current.emit("received-data", {
                       status: "created",
-                      
+
                       message: "Game Created Successfully Socket",
                       game_id: apiData?.data?.game_id,
                     });
@@ -1792,7 +1791,7 @@ socket.current.emit("game-created", { status: "scheduled", message: "Hello", gam
                             color: "#FFAB00",
                           }}
                         >
-                         Single User Winning Price
+                          Single User Winning Price
                         </h3>
                       </Col>
                       <Col lg="6" md="6" sm="6">
