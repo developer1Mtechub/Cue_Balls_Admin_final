@@ -128,7 +128,22 @@ const UserDetails = (props) => {
       sortable: true,
       name: 'USER BALL',
       minWidth: '100px',
-      selector: row => row.user_selected_winning_ball
+      selector: row => row.user_selections,
+      cell: row => (
+        <>
+          {row.user_selections.map((selection, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
+              <img
+                src={selection.user_selected_ball_image_url}
+                alt={`Ball ${selection.user_selected_winning_ball}`}
+                style={{ width: '30px', height: '30px', marginRight: '8px' }}
+              />
+              {/* <span>{selection.user_selected_winning_ball}</span> */}
+            </div>
+          ))}
+        </>
+      )
+    
     }, {
       sortable: true,
       name: 'WINNING AMOUNT',
